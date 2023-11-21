@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.RejectedExecutionException;
 
 @RequestMapping("/api/todos")
 @RestController
@@ -50,5 +51,16 @@ public class TodoController {
         responseDtoMap.forEach((key, value) -> response.add(new TodoListResponseDto(key, value)));
 
         return ResponseEntity.ok().body(response);
+    }
+
+    // 수정(제목, 작성내용)
+    @PutMapping("/{todoId}")
+    public ResponseEntity<CommonResponseDto> putTodo(@PathVariable Long todoId, @RequestBody TodoRequestDto todoRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        try {
+            TodoResponseDto responseDto = todoService.updateTodo(todoId, todoRequestDto, userDetails.getUser());
+            return ResponseEntity.ok().body(responseDto);
+        } catch (RejectedExecutionException | IllegalArgumentException ex) {
+            return ResponseEntity.badRequest().body(new CommonResponseDto(ex.getMessage(), HttpStatus.BAD_REQUEST.value()));
+        }
     }
 }
