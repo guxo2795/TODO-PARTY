@@ -2,12 +2,18 @@ package com.sparta.todoparty.todo;
 
 
 import com.sparta.todoparty.CommonResponseDto;
+import com.sparta.todoparty.user.User;
 import com.sparta.todoparty.user.UserDetailsImpl;
+import com.sparta.todoparty.user.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/api/todos")
 @RestController
@@ -16,14 +22,14 @@ public class TodoController {
 
     private final TodoService todoService;
 
-    // 할일카드 생성
+    // 생성
     @PostMapping
     public ResponseEntity<TodoResponseDto> postTodo(@RequestBody TodoRequestDto todoRequestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         TodoResponseDto responseDto =  todoService.createPost(todoRequestDto, userDetails.getUser());
         return ResponseEntity.status(201).body(responseDto);
     }
 
-    // 할일카드 조회
+    // 단건 조회
     @GetMapping("/{todoId}")
     public ResponseEntity<CommonResponseDto> getTodo(@PathVariable Long todoId) {
         try {
@@ -34,8 +40,15 @@ public class TodoController {
         }
     }
 
+    // 목록 조회
     @GetMapping
-    public ResponseEntity<Void> getTodoList() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<TodoListResponseDto>> getTodoList() {
+        List<TodoListResponseDto> response = new ArrayList<>();
+
+        Map<UserDto, List<TodoResponseDto>> responseDtoMap = todoService.getUserTodoMap();
+
+        responseDtoMap.forEach((key, value) -> response.add(new TodoListResponseDto(key, value)));
+
+        return ResponseEntity.ok().body(response);
     }
 }
