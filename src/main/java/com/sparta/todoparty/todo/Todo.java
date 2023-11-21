@@ -25,6 +25,9 @@ public class Todo {
     @Column
     private LocalDateTime createDate;
 
+    @Column
+    private Boolean isCompleted;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -33,6 +36,7 @@ public class Todo {
         this.title = dto.getTitle();
         this.content = dto.getContent();
         this.createDate = LocalDateTime.now();
+        this.isCompleted = false;
     }
 
     public void setUser(User user) {
@@ -45,5 +49,9 @@ public class Todo {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public void complete() {
+        this.isCompleted = true;
     }
 }
