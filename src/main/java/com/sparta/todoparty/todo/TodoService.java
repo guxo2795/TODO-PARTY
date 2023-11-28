@@ -10,12 +10,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.RejectedExecutionException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class TodoService {
     private final TodoRepository todoRepository;
 
+    // 생성
     public TodoResponseDto createPost(TodoRequestDto dto, User user) {
         Todo todo = new Todo(dto);
         todo.setUser(user);
@@ -25,32 +27,42 @@ public class TodoService {
         return new TodoResponseDto(todo);
     }
 
-    public TodoResponseDto getTodo(Long todoId) {
-        Todo todo = todoRepository.findById(todoId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 할일 ID 입니다."));
+    // 조회
+    public TodoResponseDto getTodoById(Long todoId) {
+        Todo todo = getTodo(todoId);
+
         return new TodoResponseDto(todo);
     }
 
-    public Map<UserDto, List<TodoResponseDto>> getUserTodoMap() {
-        Map<UserDto, List<TodoResponseDto>>  userTodoMap = new HashMap<>();
-
-        List<Todo> todoList = todoRepository.findAll(Sort.by(Sort.Direction.DESC, "createDate"));
-
-        todoList.stream().forEach(todo -> {
-            var userDto = new UserDto(todo.getUser());
-            var todoDto = new TodoResponseDto(todo);
-            if(userTodoMap.containsKey(userDto)) {
-                // 유저 할일목록에 항목 추가
-                userTodoMap.get(userDto).add(todoDto);
-            } else {
-                // 유저 할일목록을 새로 추가
-                userTodoMap.put(userDto, new ArrayList<>(List.of(todoDto)));
-            }
-        });
-
-        return userTodoMap;
+    // 목록 조회
+    public List<TodoResponseDto> getTodoList() {
+        return todoRepository.findAllByOrderByCreateDateDesc().stream()
+                .map(TodoResponseDto::new)
+                .collect(Collectors.toList());
     }
 
+//    public Map<UserDto, List<TodoResponseDto>> getUserTodoMap() {
+//        Map<UserDto, List<TodoResponseDto>>  userTodoMap = new HashMap<>();
+//
+//        List<Todo> todoList = todoRepository.findAll(Sort.by(Sort.Direction.DESC, "createDate"));
+//
+//
+//        todoList.forEach(todo -> {
+//            var userDto = new UserDto(todo.getUser());
+//            var todoDto = new TodoResponseDto(todo);
+//            if(userTodoMap.containsKey(userDto)) {
+//                // 유저 할일목록에 항목 추가
+//                userTodoMap.get(userDto).add(todoDto);
+//            } else {
+//                // 유저 할일목록을 새로 추가
+//                userTodoMap.put(userDto, new ArrayList<>(List.of(todoDto)));
+//            }
+//        });
+//
+//        return userTodoMap;
+//    }
+
+    // 수정
     @Transactional
     public TodoResponseDto updateTodo(Long todoId, TodoRequestDto todoRequestDto, User user) {
         Todo todo = getTodo(todoId, user);
@@ -61,6 +73,7 @@ public class TodoService {
         return new TodoResponseDto(todo);
     }
 
+    // 완료 처리
     @Transactional
     public TodoResponseDto completeTodo(Long todoId, User user) {
         Todo todo = getTodo(todoId, user);
@@ -71,13 +84,28 @@ public class TodoService {
 
     }
 
-    private Todo getTodo(Long todoId, User user) {
-        Todo todo = todoRepository.findById(todoId)
+    // 삭제
+    public void deletePost(User user, Long todoId) {
+        Todo post = getTodo(todoId, user);
+
+        todoRepository.delete(post);
+    }
+
+    public Todo getTodo(Long todoId) {
+
+        return todoRepository.findById(todoId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 할일 ID 입니다."));
+
+    }
+
+
+    public Todo getTodo(Long todoId, User user) {
+        Todo todo = getTodo(todoId);
 
         if(!user.getId().equals(todo.getUser().getId())) {
             throw new RejectedExecutionException("작성자만 수정할 수 있습니다.");
         }
+
         return todo;
     }
 }

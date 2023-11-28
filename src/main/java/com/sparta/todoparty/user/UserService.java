@@ -23,7 +23,6 @@ public class UserService {
             throw new IllegalArgumentException("이미 존재하는 유저 입니다.");
         }
 
-
         // 사용자 등록
         User user = new User(username, password);
         userRepository.save(user);
@@ -41,6 +40,5 @@ public class UserService {
         if(!passwordEncoder.matches(password, user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
-
     }
 }
