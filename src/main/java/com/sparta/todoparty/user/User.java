@@ -1,6 +1,7 @@
 package com.sparta.todoparty.user;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,6 +21,7 @@ public class User {
     private String password;
 
 
+    @Builder
     public User(String username, String password) {
         this.username = username;
         this.password = password;

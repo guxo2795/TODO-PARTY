@@ -3,11 +3,13 @@ package com.sparta.todoparty.user;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserRequestDto {
     @Pattern(regexp = "^[a-z0-9]{4,10}$")
     private String username;
