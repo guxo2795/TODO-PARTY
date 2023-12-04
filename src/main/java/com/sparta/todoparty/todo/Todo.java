@@ -1,20 +1,22 @@
 package com.sparta.todoparty.todo;
 
-
-//import com.sparta.todoparty.comment.Comment;
 import com.sparta.todoparty.comment.Comment;
 import com.sparta.todoparty.user.User;
 import jakarta.persistence.*;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @Entity
 @NoArgsConstructor
-public class Todo {
+@EqualsAndHashCode
+public class Todo implements Serializable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -37,6 +39,12 @@ public class Todo {
 
     @OneToMany(mappedBy = "todo")
     private List<Comment> comments;
+
+    @Builder
+    public Todo(String title, String content) {
+        this.title = title;
+        this.content = content;
+    }
 
     public Todo(TodoRequestDto dto) {
         this.title = dto.getTitle();

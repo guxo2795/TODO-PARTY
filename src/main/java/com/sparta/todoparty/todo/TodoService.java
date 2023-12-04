@@ -18,54 +18,54 @@ public class TodoService {
     private final TodoRepository todoRepository;
 
     // 생성
-    public TodoResponseDto createPost(TodoRequestDto dto, User user) {
+    public TodoResponseDto createTodo(TodoRequestDto dto, User user) {
         Todo todo = new Todo(dto);
         todo.setUser(user);
 
-        todoRepository.save(todo);
+        var saved = todoRepository.save(todo);
 
-        return new TodoResponseDto(todo);
+        return new TodoResponseDto(saved);
     }
 
     // 조회
-    public TodoResponseDto getTodoById(Long todoId) {
+    public TodoResponseDto getTodoDto(Long todoId) {
         Todo todo = getTodo(todoId);
 
         return new TodoResponseDto(todo);
     }
 
-    // 목록 조회
-    public List<TodoResponseDto> getTodoList() {
-        return todoRepository.findAllByOrderByCreateDateDesc().stream()
-                .map(TodoResponseDto::new)
-                .collect(Collectors.toList());
-    }
-
-//    public Map<UserDto, List<TodoResponseDto>> getUserTodoMap() {
-//        Map<UserDto, List<TodoResponseDto>>  userTodoMap = new HashMap<>();
-//
-//        List<Todo> todoList = todoRepository.findAll(Sort.by(Sort.Direction.DESC, "createDate"));
-//
-//
-//        todoList.forEach(todo -> {
-//            var userDto = new UserDto(todo.getUser());
-//            var todoDto = new TodoResponseDto(todo);
-//            if(userTodoMap.containsKey(userDto)) {
-//                // 유저 할일목록에 항목 추가
-//                userTodoMap.get(userDto).add(todoDto);
-//            } else {
-//                // 유저 할일목록을 새로 추가
-//                userTodoMap.put(userDto, new ArrayList<>(List.of(todoDto)));
-//            }
-//        });
-//
-//        return userTodoMap;
+//    // 목록 조회
+//    public List<TodoResponseDto> getTodoList() {
+//        return todoRepository.findAllByOrderByCreateDateDesc().stream()
+//                .map(TodoResponseDto::new)
+//                .collect(Collectors.toList());
 //    }
+
+    public Map<UserDto, List<TodoResponseDto>> getUserTodoMap() {
+        Map<UserDto, List<TodoResponseDto>>  userTodoMap = new HashMap<>();
+
+        List<Todo> todoList = todoRepository.findAll(Sort.by(Sort.Direction.DESC, "createDate"));
+
+
+        todoList.forEach(todo -> {
+            var userDto = new UserDto(todo.getUser());
+            var todoDto = new TodoResponseDto(todo);
+            if(userTodoMap.containsKey(userDto)) {
+                // 유저 할일목록에 항목 추가
+                userTodoMap.get(userDto).add(todoDto);
+            } else {
+                // 유저 할일목록을 새로 추가
+                userTodoMap.put(userDto, new ArrayList<>(List.of(todoDto)));
+            }
+        });
+
+        return userTodoMap;
+    }
 
     // 수정
     @Transactional
     public TodoResponseDto updateTodo(Long todoId, TodoRequestDto todoRequestDto, User user) {
-        Todo todo = getTodo(todoId, user);
+        Todo todo = getUserTodo(todoId, user);
 
         todo.setTitle(todoRequestDto.getTitle());
         todo.setContent(todoRequestDto.getContent());
@@ -76,7 +76,7 @@ public class TodoService {
     // 완료 처리
     @Transactional
     public TodoResponseDto completeTodo(Long todoId, User user) {
-        Todo todo = getTodo(todoId, user);
+        Todo todo = getUserTodo(todoId, user);
 
         todo.complete(); // 완료 처리
 
@@ -86,7 +86,7 @@ public class TodoService {
 
     // 삭제
     public void deletePost(User user, Long todoId) {
-        Todo post = getTodo(todoId, user);
+        Todo post = getUserTodo(todoId, user);
 
         todoRepository.delete(post);
     }
@@ -99,7 +99,7 @@ public class TodoService {
     }
 
 
-    public Todo getTodo(Long todoId, User user) {
+    public Todo getUserTodo(Long todoId, User user) {
         Todo todo = getTodo(todoId);
 
         if(!user.getId().equals(todo.getUser().getId())) {

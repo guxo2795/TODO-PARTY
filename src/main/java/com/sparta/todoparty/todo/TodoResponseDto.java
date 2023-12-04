@@ -3,13 +3,15 @@ package com.sparta.todoparty.todo;
 
 import com.sparta.todoparty.CommonResponseDto;
 import com.sparta.todoparty.user.UserDto;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Getter
 @Setter
+@Getter
+@Builder
+@EqualsAndHashCode(callSuper = false)
+@AllArgsConstructor
 public class TodoResponseDto extends CommonResponseDto {
     private Long id;
     private String title;
@@ -17,6 +19,10 @@ public class TodoResponseDto extends CommonResponseDto {
     private Boolean isCompleted;
     private UserDto user;
     private LocalDateTime createDate;
+
+    public TodoResponseDto(String msg, Integer statusCode) {
+        super(msg, statusCode);
+    }
 
     public TodoResponseDto(Todo todo) {
         this.id = todo.getId();
